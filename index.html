@@ -149,12 +149,32 @@
     .section h2{
       display:flex; align-items:center; justify-content:space-between;
       margin:.75rem 0 .25rem; font-size:1rem; font-weight:600; color:var(--cabana-red);
+      cursor: pointer; user-select: none; padding:8px 6px; border-radius:10px;
+      transition: background .2s ease;
+    }
+    .section h2:hover{ background:rgba(0,0,0,.03); }
+    .section h2 .chevron{
+      display:inline-block; transition: transform .3s ease;
+      margin-right:8px; font-size:0.85rem; color:var(--muted);
+    }
+    .section h2.collapsed .chevron{ transform: rotate(-90deg); }
+    .section-content{
+      overflow:hidden; transition: max-height .3s ease, opacity .3s ease;
+      max-height: 2000px; opacity:1;
+    }
+    .section-content.collapsed{
+      max-height: 0; opacity:0;
     }
     .subsum{font-variant-numeric:tabular-nums; font-weight:600; color:#222;}
     .row{
       display:flex; align-items:center; justify-content:space-between;
-      gap:10px; padding:8px 10px; border-radius:10px; transition: background .15s ease, transform .2s ease, box-shadow .2s ease;
+      gap:10px; padding:8px 10px; border-radius:10px; transition: background .15s ease, transform .2s ease, box-shadow .2s ease, border .2s ease;
       position:relative;
+      border: 2px solid transparent;
+    }
+    .row.warning{
+      border-color: rgba(255,193,7,.5);
+      background: rgba(255,193,7,.05);
     }
     .row::after{
       content:"";
@@ -168,14 +188,36 @@
     }
     .row:hover{ background:rgba(0,0,0,.03); transform:translateY(-1px); box-shadow:0 10px 20px rgba(15,23,42,.06); }
     .row.focused::after{opacity:1; animation:pulse 1s ease forwards;}
-    .row label{ flex:1; min-width:140px }
+    .row label{
+      flex:1; min-width:120px; display:flex; align-items:center; gap:6px;
+    }
+    .row .warning-icon{
+      font-size:1rem; color:#ff9800;
+      animation: warningPulse 2s ease-in-out infinite;
+    }
+    .row .input-group{
+      display:flex; align-items:center; gap:6px;
+    }
+    .row .stepper-btn{
+      width:40px; height:40px; border:1px solid var(--border); border-radius:10px;
+      background:var(--card); color:var(--ink); font-size:1.3rem; font-weight:600;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition: all .15s ease; user-select:none; -webkit-tap-highlight-color:transparent;
+    }
+    .row .stepper-btn:hover{
+      background:rgba(212,22,43,.1); border-color:var(--cabana-red);
+      transform:scale(1.05);
+    }
+    .row .stepper-btn:active{
+      transform:scale(0.95);
+    }
     .row input[type="number"]{
-      width:110px; max-width:110px; padding:12px 10px; font-size:1rem; text-align:right;
+      width:90px; max-width:90px; padding:12px 10px; font-size:1rem; text-align:center;
       border:1px solid var(--border); border-radius:10px; outline:none;
       transition: box-shadow .2s ease, transform .1s ease; -webkit-appearance: none; appearance: textfield;
     }
     .row input[type="number"]:focus{ box-shadow:0 0 0 3px rgba(212,22,43,.2); transform:scale(1.02); }
-    .row .subtotal{ width:120px; flex-shrink:0; text-align:right; font-variant-numeric:tabular-nums; color:var(--muted); }
+    .row .subtotal{ width:100px; flex-shrink:0; text-align:right; font-variant-numeric:tabular-nums; color:var(--muted); font-size:0.9rem; }
 
     /* Sticky bottom action bar */
     .actionbar{
@@ -234,11 +276,17 @@
       100%{transform:scale(1);}
     }
 
-    @media (max-width:420px){
-      .row{ padding:10px 8px }
-      .row label{ min-width:120px }
-      .row input[type="number"]{ width:96px; max-width:96px; padding:12px 8px }
-      .row .subtotal{ width:96px }
+    @keyframes warningPulse{
+      0%, 100%{opacity:1; transform:scale(1);}
+      50%{opacity:.6; transform:scale(1.15);}
+    }
+
+    @media (max-width:520px){
+      .row{ padding:10px 6px; gap:6px; }
+      .row label{ min-width:90px; font-size:0.9rem; }
+      .row .stepper-btn{ width:36px; height:36px; font-size:1.2rem; }
+      .row input[type="number"]{ width:70px; max-width:70px; padding:10px 6px; font-size:0.95rem; }
+      .row .subtotal{ width:80px; font-size:0.85rem; }
       .insights{ grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); }
       .insight-card{ padding:12px; }
       .insight-value{ font-size:1.1rem; }
@@ -291,13 +339,17 @@
         </div>
 
         <section class="section">
-          <h2>Bills <span id="billsTotal" class="subsum">$0.00</span></h2>
-          <div id="bills"></div>
+          <h2><span class="chevron">▼</span><span>Bills</span> <span id="billsTotal" class="subsum">$0.00</span></h2>
+          <div class="section-content" id="billsContent">
+            <div id="bills"></div>
+          </div>
         </section>
 
         <section class="section">
-          <h2>Coins <span id="coinsTotal" class="subsum">$0.00</span></h2>
-          <div id="coins"></div>
+          <h2><span class="chevron">▼</span><span>Coins</span> <span id="coinsTotal" class="subsum">$0.00</span></h2>
+          <div class="section-content" id="coinsContent">
+            <div id="coins"></div>
+          </div>
         </section>
       </div>
     </div>
@@ -411,15 +463,38 @@
     }
 
 
+    // Warning thresholds (counts that seem high)
+    const warningThresholds = {
+      10000: 20,  // $100 bills: >20 = $2000+
+      5000: 30,   // $50 bills: >30 = $1500+
+      2000: 50,   // $20 bills: >50 = $1000+
+      1000: 100,  // $10 bills: >100 = $1000+
+      500: 100,   // $5 bills: >100 = $500+
+      200: 50,    // $2 coins: >50
+      100: 50,    // $1 coins: >50
+      25: 80,     // 25¢: >80 (2 rolls)
+      10: 100,    // 10¢: >100 (2 rolls)
+      5: 100,     // 5¢: >100 (2 rolls)
+    };
+
     // Build rows
     function createInputs(list, containerId){
       const cont = document.getElementById(containerId);
       list.forEach(d => {
         const row = document.createElement('div');
         row.className = 'row';
+        row.dataset.denom = d.v;
 
         const label = document.createElement('label');
-        label.textContent = d.label;
+        const labelText = document.createElement('span');
+        labelText.textContent = d.label;
+        label.appendChild(labelText);
+
+        const minusBtn = document.createElement('button');
+        minusBtn.className = 'stepper-btn';
+        minusBtn.innerHTML = '−';
+        minusBtn.setAttribute('aria-label', 'Decrease');
+        minusBtn.type = 'button';
 
         const input = document.createElement('input');
         input.type = 'number';
@@ -427,6 +502,28 @@
         input.inputMode = 'numeric';
         input.dataset.val = d.v;
         input.value = localStorage.getItem('denom-' + d.v) || '0';
+
+        const plusBtn = document.createElement('button');
+        plusBtn.className = 'stepper-btn';
+        plusBtn.innerHTML = '+';
+        plusBtn.setAttribute('aria-label', 'Increase');
+        plusBtn.type = 'button';
+
+        // Stepper functionality
+        minusBtn.addEventListener('click', () => {
+          const current = parseInt(input.value) || 0;
+          if(current > 0) {
+            input.value = current - 1;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        });
+
+        plusBtn.addEventListener('click', () => {
+          const current = parseInt(input.value) || 0;
+          input.value = current + 1;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
         input.addEventListener('focus', () => {
           if(input.value==='0') input.value='';
           row.classList.add('focused');
@@ -438,18 +535,79 @@
         input.addEventListener('input', () => {
           row.classList.add('focused');
           setTimeout(()=>row.classList.remove('focused'), 600);
+          checkWarning(row, input);
         });
+
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'input-group';
+        inputGroup.append(minusBtn, input, plusBtn);
 
         const subtotal = document.createElement('div');
         subtotal.className = 'subtotal';
         subtotal.textContent = '= 0.00 CAD';
 
-        row.append(label, input, subtotal);
+        row.append(label, inputGroup, subtotal);
         cont.append(row);
       });
     }
+
+    function checkWarning(row, input){
+      const val = parseInt(input.dataset.val);
+      const count = parseInt(input.value) || 0;
+      const threshold = warningThresholds[val];
+
+      let warningIcon = row.querySelector('.warning-icon');
+
+      if(threshold && count > threshold){
+        row.classList.add('warning');
+        if(!warningIcon){
+          warningIcon = document.createElement('span');
+          warningIcon.className = 'warning-icon';
+          warningIcon.textContent = '⚠';
+          warningIcon.title = 'Unusually high count';
+          row.querySelector('label').appendChild(warningIcon);
+        }
+      } else {
+        row.classList.remove('warning');
+        if(warningIcon){
+          warningIcon.remove();
+        }
+      }
+    }
+
     createInputs(billDenoms,'bills');
     createInputs(coinDenoms,'coins');
+
+    // Collapsible sections
+    function setupCollapsible(){
+      $$('.section h2').forEach(header => {
+        header.addEventListener('click', () => {
+          const section = header.parentElement;
+          const content = section.querySelector('.section-content');
+          const chevron = header.querySelector('.chevron');
+
+          header.classList.toggle('collapsed');
+          content.classList.toggle('collapsed');
+
+          // Save state
+          const sectionId = content.id;
+          const isCollapsed = content.classList.contains('collapsed');
+          localStorage.setItem('collapsed-' + sectionId, isCollapsed);
+        });
+      });
+
+      // Restore collapsed state
+      $$('.section-content').forEach(content => {
+        const isCollapsed = localStorage.getItem('collapsed-' + content.id) === 'true';
+        if(isCollapsed){
+          const header = content.parentElement.querySelector('h2');
+          header.classList.add('collapsed');
+          content.classList.add('collapsed');
+        }
+      });
+    }
+
+    setupCollapsible();
 
     // Animations
     function tweenNumber(el, to, duration=320){
@@ -573,6 +731,13 @@
       }
     }
     $$('input[type="number"]').forEach(i => i.addEventListener('input', updateTotals));
+
+    // Check warnings on initial load
+    $$('.row').forEach(row => {
+      const input = row.querySelector('input[type="number"]');
+      if(input) checkWarning(row, input);
+    });
+
     updateTotals();
 
     // Reset
@@ -581,6 +746,12 @@
       $$('input[type="number"]').forEach(i => {
         i.value = '0';
         localStorage.removeItem('denom-'+i.dataset.val);
+      });
+      // Clear all warnings
+      $$('.row').forEach(row => {
+        row.classList.remove('warning');
+        const warningIcon = row.querySelector('.warning-icon');
+        if(warningIcon) warningIcon.remove();
       });
       updateTotals();
     });
