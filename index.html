@@ -17,6 +17,14 @@
       --border:#e6e8ef;
       --shadow:0 10px 30px rgba(0,0,0,.08);
     }
+    [data-theme="dark"]{
+      --bg:#0f1419;
+      --card:#1a1f26;
+      --ink:#e8eaed;
+      --muted:#9ca3af;
+      --border:#2d3139;
+      --shadow:0 10px 30px rgba(0,0,0,.5);
+    }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -29,6 +37,10 @@
       color:var(--ink);
       position:relative;
       overflow-x:hidden;
+      transition:background .3s ease, color .3s ease;
+    }
+    [data-theme="dark"] body{
+      background:linear-gradient(135deg,#0a0e13,#0f1419 35%,#1a1f26 70%,#0f1419);
     }
 
     body::before,
@@ -173,6 +185,7 @@
     .btn-reset{ background:#2b2b2b; color:#fff;}
     .btn-export{ background:var(--cabana-red); color:#fff;}
     .btn-html{ background:#1c6dd0; color:#fff;}
+    .btn-theme{ background:#6b46c1; color:#fff; min-width:56px; padding:14px 12px; font-size:1.2rem; }
 
     .toast{ position:fixed; left:50%; bottom:76px; transform:translateX(-50%) translateY(20px);
       background:#222; color:#fff; padding:10px 14px; border-radius:10px;
@@ -277,6 +290,7 @@
 
   <!-- Sticky action bar -->
   <div class="actionbar" role="toolbar" aria-label="Actions">
+    <button class="btn btn-theme" id="themeBtn" aria-label="Toggle theme" title="Toggle light/dark mode"><span id="themeIcon">🌙</span></button>
     <button class="btn btn-reset" id="resetBtn"><span>Reset</span></button>
     <button class="btn btn-export" id="exportBtn"><span>Export PDF</span></button>
     <button class="btn btn-html" id="exportHtmlBtn"><span>Export HTML</span></button>
@@ -309,6 +323,25 @@
     const $$ = sel => Array.from(document.querySelectorAll(sel));
     const fmt = n => n.toLocaleString('en-CA',{style:'currency',currency:'CAD'});
     const logoEl = document.getElementById('logo');
+
+    // Theme toggle
+    const themeBtn = document.getElementById('themeBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('theme', theme);
+    }
+
+    setTheme(savedTheme);
+
+    themeBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+    });
 
     const logoToDataUrl = () => {
       try{
