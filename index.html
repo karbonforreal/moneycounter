@@ -26,10 +26,13 @@
       --shadow:0 10px 30px rgba(0,0,0,.5);
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
+    html,body{height:100%; min-height:100%;}
     html{
-      background:var(--bg);
+      background:linear-gradient(135deg,#f8fafc,#eef2f7 35%,#e9eef6 70%,#f8fafc);
       transition:background .3s ease;
+    }
+    [data-theme="dark"] html{
+      background:linear-gradient(135deg,#0a0e13,#0f1419 35%,#1a1f26 70%,#0f1419);
     }
     body{
       margin:0;
