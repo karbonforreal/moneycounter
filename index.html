@@ -18,12 +18,12 @@
       --shadow:0 10px 30px rgba(0,0,0,.08);
     }
     [data-theme="dark"]{
-      --bg:#0f1419;
-      --card:#1a1f26;
+      --bg:#1a1f28;
+      --card:#252b36;
       --ink:#e8eaed;
       --muted:#9ca3af;
-      --border:#2d3139;
-      --shadow:0 10px 30px rgba(0,0,0,.5);
+      --border:#3d4451;
+      --shadow:0 10px 30px rgba(0,0,0,.7);
     }
     *{box-sizing:border-box}
     html{
@@ -45,7 +45,7 @@
       transition:background .3s ease, color .3s ease;
     }
     [data-theme="dark"] body{
-      background:linear-gradient(135deg,#0a0e13,#0f1419 35%,#1a1f26 70%,#0f1419);
+      background:linear-gradient(135deg,#141923,#1a1f28 35%,#1f252e 70%,#1a1f28);
       background-attachment: fixed;
       background-size:200% 200%;
     }
@@ -105,7 +105,8 @@
       }
     .total-label{font-weight:600; letter-spacing:.2px}
     .total-amount{font-variant-numeric:tabular-nums; font-size:1.25rem; font-weight:600}
-    .insights{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin:12px 0 18px; }
+    .insights{ display:flex; justify-content:center; gap:12px; margin:12px 0 18px; }
+    .insights .insight-card{ max-width:400px; flex:1; }
     .insight-card{
       position:relative;
       background:linear-gradient(135deg,rgba(255,255,255,.92),rgba(248,250,252,.75));
@@ -127,12 +128,15 @@
     .insight-card:hover{ transform:translateY(-4px) scale(1.01); box-shadow:0 16px 32px rgba(17,24,39,.12); }
     .insight-card:hover::after{opacity:1;}
     [data-theme="dark"] .insight-card{
-      background:linear-gradient(135deg,rgba(26,31,38,.95),rgba(31,38,48,.85));
-      border:1px solid rgba(45,49,57,.9);
-      box-shadow:0 10px 25px rgba(0,0,0,.3);
+      background:linear-gradient(135deg,rgba(37,43,54,.98),rgba(45,52,62,.95));
+      border:1px solid rgba(61,68,81,.95);
+      box-shadow:0 10px 25px rgba(0,0,0,.4);
     }
     [data-theme="dark"] .insight-card:hover{
-      box-shadow:0 16px 32px rgba(0,0,0,.5);
+      box-shadow:0 16px 32px rgba(0,0,0,.6);
+    }
+    [data-theme="dark"] .card{
+      box-shadow:0 10px 40px rgba(0,0,0,.6);
     }
     .insight-label{font-size:.8rem; letter-spacing:.3px; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
     .insight-value{font-size:1.35rem; font-weight:600; letter-spacing:.4px; transition:transform .35s ease, color .35s ease;}
@@ -204,9 +208,16 @@
       cursor:pointer; display:flex; align-items:center; justify-content:center;
       transition: all .15s ease; user-select:none; -webkit-tap-highlight-color:transparent;
     }
+    [data-theme="dark"] .row .stepper-btn{
+      background:rgba(30,36,44,.8);
+      border:1px solid var(--border);
+    }
     .row .stepper-btn:hover{
       background:rgba(212,22,43,.1); border-color:var(--cabana-red);
       transform:scale(1.05);
+    }
+    [data-theme="dark"] .row .stepper-btn:hover{
+      background:rgba(212,22,43,.2);
     }
     .row .stepper-btn:active{
       transform:scale(0.95);
@@ -215,8 +226,13 @@
       width:90px; max-width:90px; padding:12px 10px; font-size:1rem; text-align:center;
       border:1px solid var(--border); border-radius:10px; outline:none;
       transition: box-shadow .2s ease, transform .1s ease; -webkit-appearance: none; appearance: textfield;
+      background:var(--card); color:var(--ink);
     }
     .row input[type="number"]:focus{ box-shadow:0 0 0 3px rgba(212,22,43,.2); transform:scale(1.02); }
+    [data-theme="dark"] .row input[type="number"]{
+      border:1px solid var(--border);
+      background:rgba(30,36,44,.8);
+    }
     .row .subtotal{ width:100px; flex-shrink:0; text-align:right; font-variant-numeric:tabular-nums; color:var(--muted); font-size:0.9rem; }
 
     /* Sticky bottom action bar */
@@ -225,6 +241,9 @@
       display:flex; gap:12px; align-items:center; justify-content:center;
       padding:12px 14px; background:rgba(255,255,255,.9); backdrop-filter: blur(8px);
       border-top:1px solid var(--border);
+    }
+    [data-theme="dark"] .actionbar{
+      background:rgba(37,43,54,.95);
     }
     .btn{ padding:14px 16px; border:0; border-radius:12px; cursor:pointer; font-weight:600; box-shadow:0 6px 16px rgba(0,0,0,.08); min-width:120px; position:relative; overflow:hidden; }
     .btn span{position:relative; z-index:2;}
@@ -313,21 +332,6 @@
         </div>
 
         <div class="insights" aria-live="polite">
-          <div class="insight-card">
-            <div class="insight-label">Items counted</div>
-            <div class="insight-value" id="insightTotalCount">0</div>
-            <div class="insight-meta" id="insightAverage">$0.00 avg</div>
-          </div>
-          <div class="insight-card">
-            <div class="insight-label">Live total pulse</div>
-            <div class="insight-value" id="insightLiveTotal">$0.00</div>
-            <div class="insight-meta">Change <span id="insightDelta" class="delta">$0.00</span></div>
-          </div>
-          <div class="insight-card">
-            <div class="insight-label">Dominant denomination</div>
-            <div class="insight-value" id="insightDominant">Add counts</div>
-            <div class="insight-meta" id="insightDominantMeta">Waiting for data…</div>
-          </div>
           <div class="insight-card">
             <div class="insight-label">Bills vs coins</div>
             <div class="split-bar">
@@ -635,8 +639,6 @@
       return cents;
     }
 
-    let previousGrand = 0;
-
     function updateTotals(){
       const billCents = sumContainer('#bills');
       const coinCents = sumContainer('#coins');
@@ -646,77 +648,20 @@
       tweenNumber($('#coinsTotal'), coinCents/100);
       tweenNumber($('#grandTotal'), grand);
 
-      let totalCount = 0;
-      let dominantSubtotal = 0;
-      let dominantLabel = '';
-      let dominantCount = 0;
-      let dominantEach = 0;
-
       $$('.row').forEach(r => {
         const i = r.querySelector('input');
         const c = +i.value || 0;
         const v = +i.dataset.val;
         const sub = r.querySelector('.subtotal');
-        const label = r.querySelector('label').textContent;
         const each = v / 100;
         const subtotalVal = c * each;
         sub.textContent = '= ' + fmt(subtotalVal);
         localStorage.setItem('denom-'+v, c);
-        totalCount += c;
-        if(subtotalVal > dominantSubtotal){
-          dominantSubtotal = subtotalVal;
-          dominantLabel = label;
-          dominantCount = c;
-          dominantEach = each;
-        }
       });
 
-      const totalCountEl = $('#insightTotalCount');
-      const averageEl = $('#insightAverage');
-      const liveTotalEl = $('#insightLiveTotal');
-      const deltaEl = $('#insightDelta');
-      const dominantEl = $('#insightDominant');
-      const dominantMetaEl = $('#insightDominantMeta');
       const splitBillsEl = $('#insightSplitBills');
       const splitCoinsEl = $('#insightSplitCoins');
       const splitMetaEl = $('#insightSplitMeta');
-
-      totalCountEl.textContent = totalCount.toLocaleString('en-CA');
-      if(totalCount > 0){
-        const average = grand / totalCount;
-        averageEl.textContent = fmt(average) + ' avg';
-      }else{
-        averageEl.textContent = 'Add counts to see avg';
-      }
-
-      liveTotalEl.textContent = fmt(grand);
-      liveTotalEl.classList.remove('flash');
-      void liveTotalEl.offsetWidth;
-      liveTotalEl.classList.add('flash');
-
-      const delta = grand - previousGrand;
-      if(Math.abs(delta) < 0.005){
-        deltaEl.textContent = fmt(0);
-      }else{
-        deltaEl.textContent = (delta > 0 ? '+' : '−') + fmt(Math.abs(delta));
-      }
-      deltaEl.classList.toggle('down', delta < 0);
-      deltaEl.classList.remove('flash');
-      void deltaEl.offsetWidth;
-      deltaEl.classList.add('flash');
-      previousGrand = grand;
-
-      if(dominantSubtotal > 0){
-        dominantEl.textContent = `${dominantLabel}`;
-        dominantMetaEl.textContent = `${dominantCount.toLocaleString('en-CA')} × ${fmt(dominantEach)} → ${fmt(dominantSubtotal)}`;
-        dominantEl.classList.remove('flash');
-        void dominantEl.offsetWidth;
-        dominantEl.classList.add('flash');
-      }else{
-        dominantEl.textContent = 'Add counts';
-        dominantMetaEl.textContent = 'Waiting for data…';
-        dominantEl.classList.remove('flash');
-      }
 
       if(totalCents === 0){
         splitBillsEl.style.width = '50%';
@@ -739,6 +684,73 @@
     });
 
     updateTotals();
+
+    // Keyboard shortcuts
+    const allInputs = $$('input[type="number"]');
+
+    document.addEventListener('keydown', e => {
+      // Ctrl+R to reset
+      if((e.ctrlKey || e.metaKey) && e.key === 'r'){
+        e.preventDefault();
+        $('#resetBtn').click();
+        return;
+      }
+
+      // Ctrl+P to export PDF
+      if((e.ctrlKey || e.metaKey) && e.key === 'p'){
+        e.preventDefault();
+        $('#exportBtn').click();
+        return;
+      }
+
+      // Enter to move to next field
+      if(e.key === 'Enter' && document.activeElement.type === 'number'){
+        e.preventDefault();
+        const currentIndex = allInputs.indexOf(document.activeElement);
+        if(currentIndex > -1 && currentIndex < allInputs.length - 1){
+          allInputs[currentIndex + 1].focus();
+          allInputs[currentIndex + 1].select();
+        }
+        return;
+      }
+
+      // Arrow up/down and number keys for focused input
+      if(document.activeElement.type === 'number'){
+        const input = document.activeElement;
+
+        // Arrow up increments
+        if(e.key === 'ArrowUp'){
+          e.preventDefault();
+          const current = parseInt(input.value) || 0;
+          input.value = current + 1;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          return;
+        }
+
+        // Arrow down decrements
+        if(e.key === 'ArrowDown'){
+          e.preventDefault();
+          const current = parseInt(input.value) || 0;
+          if(current > 0){
+            input.value = current - 1;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          return;
+        }
+
+        // Number keys 1-9 to add that amount
+        if(/^[1-9]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey){
+          // Only if cursor is at the end and field is focused (not typing in middle)
+          const cursorAtEnd = input.selectionStart === input.value.length;
+          if(cursorAtEnd && input.value === '0'){
+            e.preventDefault();
+            const current = parseInt(input.value) || 0;
+            input.value = current + parseInt(e.key);
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
+      }
+    });
 
     // Reset
     $('#resetBtn').addEventListener('click', () => {
