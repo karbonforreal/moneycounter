@@ -72,7 +72,7 @@
       mix-blend-mode:multiply;
     }
     .wrap{ max-width:560px; margin:18px auto 92px; padding:0 14px 120px; }
-    .card{ background:var(--card); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; border:1px solid var(--border); position:relative; }
+    .card{ background:var(--card); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; border:1px solid var(--border); position:relative; animation:cardFloatIn .7s ease both; }
     .card::after{
       content:"";
       position:absolute;
@@ -100,11 +100,29 @@
     .total-bar{
       position: sticky; top:0; z-index:10;
       display:flex; align-items:center; justify-content:space-between; gap:12px;
-      background:var(--card); border: 1px solid var(--border);
-      border-radius:12px; padding:10px 12px; margin:10px 0 12px;
-      }
+      background:
+        linear-gradient(135deg, rgba(212,22,43,.12), rgba(25,118,210,.08)) border-box,
+        var(--card) padding-box;
+      border:1px solid transparent;
+      border-radius:14px; padding:14px 16px; margin:10px 0 16px;
+      box-shadow:0 12px 30px rgba(17,24,39,.12);
+      transition: box-shadow .35s ease, transform .35s ease;
+    }
+    .total-bar.glow{
+      box-shadow:0 18px 42px rgba(212,22,43,.28);
+      transform:translateY(-2px);
+    }
     .total-label{font-weight:600; letter-spacing:.2px}
-    .total-amount{font-variant-numeric:tabular-nums; font-size:1.25rem; font-weight:600}
+    .total-amount{font-variant-numeric:tabular-nums; font-size:1.35rem; font-weight:600; position:relative;}
+    .total-amount.pulse::after{
+      content:"";
+      position:absolute;
+      inset:-6px;
+      border-radius:12px;
+      background:radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,0));
+      opacity:0;
+      animation:totalPulse .6s ease forwards;
+    }
     .insights{ display:flex; justify-content:center; gap:12px; margin:12px 0 18px; }
     .insights .insight-card{ max-width:400px; flex:1; }
     .insight-card{
@@ -116,6 +134,8 @@
       box-shadow:0 10px 25px rgba(17,24,39,.08);
       overflow:hidden;
       transition:transform .4s ease, box-shadow .4s ease;
+      background-size:220% 220%;
+      animation:cardSheen 18s ease infinite;
     }
     .insight-card::after{
       content:"";
@@ -138,10 +158,20 @@
     [data-theme="dark"] .card{
       box-shadow:0 10px 40px rgba(0,0,0,.6);
     }
+    [data-theme="dark"] .total-bar{
+      background:
+        linear-gradient(135deg, rgba(212,22,43,.3), rgba(33,150,243,.18)) border-box,
+        rgba(37,43,54,.96) padding-box;
+      box-shadow:0 12px 36px rgba(0,0,0,.6);
+    }
+    [data-theme="dark"] .total-bar.glow{
+      box-shadow:0 18px 46px rgba(212,22,43,.45);
+    }
     .insight-label{font-size:.8rem; letter-spacing:.3px; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
     .insight-value{font-size:1.35rem; font-weight:600; letter-spacing:.4px; transition:transform .35s ease, color .35s ease;}
     .insight-value.flash{animation:pop .6s ease;}
-    .insight-meta{font-size:.75rem; color:var(--muted); margin-top:4px; display:flex; align-items:center; gap:6px;}
+    .insight-meta{font-size:.75rem; color:var(--muted); margin-top:4px; display:flex; align-items:center; gap:6px; transition: color .35s ease, text-shadow .35s ease;}
+    .insight-meta.spark{color:var(--cabana-amber); text-shadow:0 0 10px rgba(255,154,68,.35);}
     .delta{font-weight:600; color:var(--cabana-red); display:inline-flex; align-items:center; gap:4px;}
     .delta.down{color:#1c6dd0;}
     .delta.flash{animation:pop .6s ease;}
@@ -175,10 +205,8 @@
       gap:10px; padding:8px 10px; border-radius:10px; transition: background .15s ease, transform .2s ease, box-shadow .2s ease, border .2s ease;
       position:relative;
       border: 2px solid transparent;
-    }
-    .row.warning{
-      border-color: rgba(255,193,7,.5);
-      background: rgba(255,193,7,.05);
+      animation:fadeInUp .6s ease both;
+      animation-delay:var(--delay,0s);
     }
     .row::after{
       content:"";
@@ -194,10 +222,6 @@
     .row.focused::after{opacity:1; animation:pulse 1s ease forwards;}
     .row label{
       flex:1; min-width:120px; display:flex; align-items:center; gap:6px;
-    }
-    .row .warning-icon{
-      font-size:1rem; color:#ff9800;
-      animation: warningPulse 2s ease-in-out infinite;
     }
     .row .input-group{
       display:flex; align-items:center; gap:6px;
@@ -295,9 +319,25 @@
       100%{transform:scale(1);}
     }
 
-    @keyframes warningPulse{
-      0%, 100%{opacity:1; transform:scale(1);}
-      50%{opacity:.6; transform:scale(1.15);}
+    @keyframes totalPulse{
+      0%{opacity:0; transform:scale(.85);}
+      30%{opacity:1; transform:scale(1.05);}
+      100%{opacity:0; transform:scale(1.15);}
+    }
+
+    @keyframes fadeInUp{
+      0%{opacity:0; transform:translate3d(0,14px,0);}
+      100%{opacity:1; transform:translate3d(0,0,0);}
+    }
+
+    @keyframes cardSheen{
+      0%,100%{background-position:0% 50%;}
+      50%{background-position:100% 50%;}
+    }
+
+    @keyframes cardFloatIn{
+      0%{opacity:0; transform:translate3d(0,18px,0) scale(.98);}
+      100%{opacity:1; transform:translate3d(0,0,0) scale(1);}
     }
 
     @media (max-width:520px){
@@ -395,6 +435,14 @@
     const fmt = n => n.toLocaleString('en-CA',{style:'currency',currency:'CAD'});
     const logoEl = document.getElementById('logo');
 
+    function triggerAnimation(el, className, duration=600){
+      if(!el) return;
+      el.classList.remove(className);
+      void el.offsetWidth;
+      el.classList.add(className);
+      setTimeout(() => el.classList.remove(className), duration);
+    }
+
     // Theme toggle
     const themeBtn = document.getElementById('themeBtn');
     const themeIcon = document.getElementById('themeIcon');
@@ -466,21 +514,6 @@
       return logoDataUrlPromise;
     }
 
-
-    // Warning thresholds (counts that seem high)
-    const warningThresholds = {
-      10000: 20,  // $100 bills: >20 = $2000+
-      5000: 30,   // $50 bills: >30 = $1500+
-      2000: 50,   // $20 bills: >50 = $1000+
-      1000: 100,  // $10 bills: >100 = $1000+
-      500: 100,   // $5 bills: >100 = $500+
-      200: 50,    // $2 coins: >50
-      100: 50,    // $1 coins: >50
-      25: 80,     // 25¢: >80 (2 rolls)
-      10: 100,    // 10¢: >100 (2 rolls)
-      5: 100,     // 5¢: >100 (2 rolls)
-    };
-
     // Build rows
     function createInputs(list, containerId){
       const cont = document.getElementById(containerId);
@@ -488,6 +521,8 @@
         const row = document.createElement('div');
         row.className = 'row';
         row.dataset.denom = d.v;
+        const delayIndex = cont.children.length;
+        row.style.setProperty('--delay', `${delayIndex * 0.04}s`);
 
         const label = document.createElement('label');
         const labelText = document.createElement('span');
@@ -539,7 +574,6 @@
         input.addEventListener('input', () => {
           row.classList.add('focused');
           setTimeout(()=>row.classList.remove('focused'), 600);
-          checkWarning(row, input);
         });
 
         const inputGroup = document.createElement('div');
@@ -553,30 +587,6 @@
         row.append(label, inputGroup, subtotal);
         cont.append(row);
       });
-    }
-
-    function checkWarning(row, input){
-      const val = parseInt(input.dataset.val);
-      const count = parseInt(input.value) || 0;
-      const threshold = warningThresholds[val];
-
-      let warningIcon = row.querySelector('.warning-icon');
-
-      if(threshold && count > threshold){
-        row.classList.add('warning');
-        if(!warningIcon){
-          warningIcon = document.createElement('span');
-          warningIcon.className = 'warning-icon';
-          warningIcon.textContent = '⚠';
-          warningIcon.title = 'Unusually high count';
-          row.querySelector('label').appendChild(warningIcon);
-        }
-      } else {
-        row.classList.remove('warning');
-        if(warningIcon){
-          warningIcon.remove();
-        }
-      }
     }
 
     createInputs(billDenoms,'bills');
@@ -647,6 +657,8 @@
       tweenNumber($('#billsTotal'), billCents/100);
       tweenNumber($('#coinsTotal'), coinCents/100);
       tweenNumber($('#grandTotal'), grand);
+      triggerAnimation($('#grandTotal'), 'pulse');
+      triggerAnimation($('.total-bar'), 'glow', 700);
 
       $$('.row').forEach(r => {
         const i = r.querySelector('input');
@@ -667,21 +679,17 @@
         splitBillsEl.style.width = '50%';
         splitCoinsEl.style.width = '50%';
         splitMetaEl.textContent = '50% bills / 50% coins';
+        triggerAnimation(splitMetaEl, 'spark', 500);
       }else{
         const billsPct = (billCents / totalCents) * 100;
         const coinsPct = 100 - billsPct;
         splitBillsEl.style.width = billsPct.toFixed(1) + '%';
         splitCoinsEl.style.width = coinsPct.toFixed(1) + '%';
         splitMetaEl.textContent = `${Math.round(billsPct)}% bills / ${Math.round(coinsPct)}% coins`;
+        triggerAnimation(splitMetaEl, 'spark', 700);
       }
     }
     $$('input[type="number"]').forEach(i => i.addEventListener('input', updateTotals));
-
-    // Check warnings on initial load
-    $$('.row').forEach(row => {
-      const input = row.querySelector('input[type="number"]');
-      if(input) checkWarning(row, input);
-    });
 
     updateTotals();
 
@@ -758,12 +766,6 @@
       $$('input[type="number"]').forEach(i => {
         i.value = '0';
         localStorage.removeItem('denom-'+i.dataset.val);
-      });
-      // Clear all warnings
-      $$('.row').forEach(row => {
-        row.classList.remove('warning');
-        const warningIcon = row.querySelector('.warning-icon');
-        if(warningIcon) warningIcon.remove();
       });
       updateTotals();
     });
